@@ -15,13 +15,10 @@ Log.Logger = new LoggerConfiguration()
   .CreateLogger();
 
 var logger = Log.Logger.ForContext<Program>();
-var builder = WebApplication.CreateBuilder(args);
+var builder = Host.CreateApplicationBuilder(args);
 
-builder.Host.UseSerilog();
+builder.Services.AddSerilog();
 builder.Services.AddScheduler();
-
-builder.WebHost.UseUrls(Parameters.LISTEN_URL);
-builder.WebHost.UseKestrel();
 
 builder.Services.AddDbContextFactory<DatabaseContext>(options => {
   options.UseNpgsql(
@@ -37,23 +34,13 @@ builder.Services.AddSingleton<EventBus>();
 builder.Services.AddSingleton<IRepository, Repository>();
 builder.Services.AddHostedService<DiscordBot>();
 
-builder.Services.AddTransient<DailyYouTubeReSubscribe>();
-
-builder.Services.AddControllers().AddXmlSerializerFormatters();
+builder.Services.AddTransient<YouTubeVideoPoller>();
 
 var application = builder.Build();
 
 application.Services.UseScheduler(scheduler => {
-  var gmt = TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time");
-  var gmtMidnight = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow.Date, gmt).AddDays(1);
-  var midnightHour = gmtMidnight.Hour;
-
-  scheduler.Schedule<DailyYouTubeReSubscribe>().DailyAtHour(midnightHour);
+  scheduler.Schedule<YouTubeVideoPoller>().EveryMinute();
 });
-
-application.UseRouting();
-application.MapControllers();
-application.MapGet("/", () => "ALIVE");
 
 try {
   logger.Information("StackerBot is applying database migrations");

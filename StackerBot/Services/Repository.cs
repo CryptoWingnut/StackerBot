@@ -63,6 +63,23 @@ public sealed class Repository(IDbContextFactory<DatabaseContext> factory, ILogg
     }
   }
 
+  public async ValueTask<Union<Success, NotFound, DatabaseError>> UpdateLastVideoTime(Guid id, DateTime published, CancellationToken cancellationToken) {
+    return await Executor(action, "update_last_video_time", cancellationToken);
+
+    async Task<Union<Success, NotFound>> action(DatabaseContext context) {
+      var subscription = await context.YouTubeSubscriptions.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+
+      if (subscription is null) {
+        return NotFound.Instance;
+      }
+
+      subscription.LastVideo = published;
+      context.YouTubeSubscriptions.Update(subscription);
+      await context.SaveChangesAsync(cancellationToken);
+      return Success.Instance;
+    }
+  }
+
   private async ValueTask<Union<T, DatabaseError>> Executor<T>(Func<DatabaseContext, Task<T>> action, string operation, CancellationToken cancellationToken) {
     return await Executor(wrappedAction, operation, cancellationToken);
 

@@ -29,7 +29,7 @@ public sealed class DiscordCommandsModule(IExternals externals, IRepository repo
 
     var subscription = new YouTubeSubscriptionModel {
       Id = Guid.NewGuid(), ChannelId = channelId, ChannelName = channelName, AddedAt = DateTime.UtcNow,
-      AddedBy = context.User.Id
+      AddedBy = context.User.Id, LastVideo = DateTime.UtcNow
     };
 
     await repository.AddYouTubeSubscription(subscription, CancellationToken.None);

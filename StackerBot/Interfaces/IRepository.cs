@@ -6,4 +6,5 @@ public interface IRepository {
   ValueTask<Union<YouTubeSubscriptionModel, NotFound, DatabaseError>> FindYouTubeSubscriptionById(string channelId, CancellationToken cancellationToken);
   ValueTask<Union<Success, NotFound, DatabaseError>> RemoveYouTubeSubscription(Guid id, CancellationToken cancellationToken);
   ValueTask<Union<List<YouTubeSubscriptionModel>, DatabaseError>> GetYouTubeSubscriptions(CancellationToken cancellationToken);
+  ValueTask<Union<Success, NotFound, DatabaseError>> UpdateLastVideoTime(Guid id, DateTime published, CancellationToken cancellationToken);
 }

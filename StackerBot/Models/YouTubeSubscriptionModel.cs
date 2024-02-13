@@ -12,4 +12,6 @@ public sealed class YouTubeSubscriptionModel {
   public required ulong AddedBy { get; init; }
   [Column("added_at")]
   public required DateTime AddedAt { get; init; }
+  [Column("last_video")]
+  public required DateTime LastVideo { get; set; }
 }
