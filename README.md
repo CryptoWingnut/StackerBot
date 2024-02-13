@@ -7,3 +7,4 @@ ENVIRONMENT VARIABLES
 - DATABASE_PORT        : Port to connect to the database
 - STACKERBOT_API_KEY   : API key to connect to Discord
 - YOUTUBE_CALLBACK_URL : Callback URL for the YouTube PubSubHubbub
+- GOOGLE_API_KEY       : API key to connect to Google

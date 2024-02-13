@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.Xml.Serialization;
 using StackerBot.Services;
 
 namespace StackerBot;
@@ -12,36 +11,26 @@ public sealed class WebhooksController(EventBus eventBus, IRepository repository
   }
 
   [HttpPost("yt_sub_notify")]
-  public async ValueTask<IActionResult> YouTubeSubscriptionNotify([FromBody] string data) {
+  public async ValueTask<IActionResult> YouTubeSubscriptionNotify([FromBody] YouTubeFeed feed) {
     try {
-      var serializer = new XmlSerializer(typeof(YouTubeFeed));
-      using var reader = new StringReader(data);
-      var deserialized = serializer.Deserialize(reader);
+      foreach (var entry in feed.YouTubeFeedEntries) {
+        if (entry.VideoId is null || entry.ChannelId is null) {
+          return StatusCode(200);
+        }
 
-      if (deserialized is null) {
-        logger.LogError("Failed to deserialize YouTube subscription notification data: {Data}", data);
-        return StatusCode(200);
+        var videoId = entry.VideoId;
+        var channelId = entry.ChannelId;
+        var channelResult = await repository.FindYouTubeSubscriptionById(channelId, CancellationToken.None);
+
+        if (channelResult.IsNotType(typeof(YouTubeSubscriptionModel))) {
+          return StatusCode(200);
+        }
+
+        var channel = channelResult.GetT1;
+
+
+        await eventBus.SendYouTubeChannelPost(channel.ChannelName, $"https://www.youtube.com/watch?v={videoId}");
       }
-
-      var feed = (YouTubeFeed) deserialized;
-
-      if (feed.YouTubeFeedEntry?.VideoId is null || feed.YouTubeFeedEntry.ChannelId is null) {
-        logger.LogError("Failed to deserialize YouTube subscription notification data: {Data}", data);
-        return StatusCode(200);
-      }
-
-      var videoId = feed.YouTubeFeedEntry.VideoId;
-      var channelId = feed.YouTubeFeedEntry.ChannelId;
-
-      var channelResult = await repository.FindYouTubeSubscription(channelId, CancellationToken.None);
-
-      if (channelResult.IsNotType(typeof(YouTubeSubscriptionModel))) {
-        return StatusCode(200);
-      }
-
-      var channel = channelResult.GetT1;
-
-      await eventBus.SendYouTubeChannelPost(channel.ChannelName, $"https://www.youtube.com/watch?v={videoId}");
     } catch (Exception error) {
       logger.LogError(error, "Exception occured handling YouTube subscription notification");
     }

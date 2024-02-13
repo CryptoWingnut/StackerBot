@@ -41,6 +41,20 @@ public sealed class Repository(IDbContextFactory<DatabaseContext> factory, ILogg
     }
   }
 
+  public ValueTask<Union<YouTubeSubscriptionModel, NotFound, DatabaseError>> FindYouTubeSubscriptionById(string channelId, CancellationToken cancellationToken) {
+    return Executor(action, "find_youtube_subscription", cancellationToken);
+
+    async Task<Union<YouTubeSubscriptionModel, NotFound>> action(DatabaseContext context) {
+      var subscription = await context.YouTubeSubscriptions.FirstOrDefaultAsync(x => x.ChannelId == channelId, cancellationToken);
+
+      if (subscription is null) {
+        return NotFound.Instance;
+      }
+
+      return subscription;
+    }
+  }
+
   public async ValueTask<Union<List<YouTubeSubscriptionModel>, DatabaseError>> GetYouTubeSubscriptions(CancellationToken cancellationToken) {
     return await Executor(action, "get_youtube_subscriptions", cancellationToken);
 

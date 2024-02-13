@@ -14,5 +14,5 @@ public class YouTubeFeedEntry {
 [XmlRoot(ElementName = "feed", Namespace = "http://www.w3.org/2005/Atom")]
 public class YouTubeFeed {
   [XmlElement(ElementName = "entry")]
-  public YouTubeFeedEntry? YouTubeFeedEntry { get; set; }
+  public List<YouTubeFeedEntry> YouTubeFeedEntries { get; set; } = [];
 }
