@@ -1,0 +1,33 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StackerBot", "StackerBot\StackerBot.csproj", "{42D70E48-7B3F-416A-A610-BC01855467DA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "etc", "etc", "{89E24C49-02B3-4347-9E46-BA954FEC8B93}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		.gitignore = .gitignore
+		global.json = global.json
+		README.md = README.md
+		.dockerignore = .dockerignore
+		docker-compose.yml = docker-compose.yml
+		dockerfile = dockerfile
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{42D70E48-7B3F-416A-A610-BC01855467DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{42D70E48-7B3F-416A-A610-BC01855467DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{42D70E48-7B3F-416A-A610-BC01855467DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{42D70E48-7B3F-416A-A610-BC01855467DA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

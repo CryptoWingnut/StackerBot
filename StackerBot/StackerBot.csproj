@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>dotnet-StackerBot-6DEAEB24-6CF8-406B-A87E-5E5CF348C32C</UserSecretsId>
+    <AssemblyName>stackerbot</AssemblyName>
+    <PackageId />
+    <Version />
+    <Authors />
+    <Company>Stacker Social</Company>
+    <Product>Stacker Bot</Product>
+    <AssemblyVersion>0.0.0</AssemblyVersion>
+    <FileVersion>0.0.0</FileVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <OutputPath>build/debug/</OutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <OutputPath>build/release/</OutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Coravel" Version="5.0.2" />
+    <PackageReference Include="DSharpPlus" Version="4.4.6" />
+    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.4.6" />
+    <PackageReference Include="DSharpPlus.Interactivity" Version="4.4.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Npgsql" Version="8.0.2" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.0" />
+    <PackageReference Include="Serilog" Version="3.1.1" />
+    <PackageReference Include="Serilog.Extensions.Hosting" Version="8.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
+  </ItemGroup>
+</Project>

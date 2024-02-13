@@ -1,0 +1,13 @@
+version: "3.8"
+
+services:
+  stackerbot:
+    build:
+      context: .
+      dockerfile: dockerfile
+    env_file:
+      - .env
+    ports:
+      - "5500:5000"
+    image: stacker-social/stackerbot:latest
+    restart: unless-stopped
