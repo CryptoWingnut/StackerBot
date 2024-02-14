@@ -6,6 +6,14 @@ namespace StackerBot.Tasks;
 
 public sealed class YouTubeVideoPoller(IRepository repository, ILogger<YouTubeVideoPoller> logger, EventBus eventBus) : IInvocable {
   public async Task Invoke() {
+    try {
+      await Handle();
+    } catch (Exception error) {
+      logger.LogError(error, "Exception occured while polling YouTube videos");
+    }
+  }
+
+  private async Task Handle() {
     var client = new HttpClient();
     var channelsResults = await repository.GetYouTubeSubscriptions(CancellationToken.None);
 
@@ -21,12 +29,10 @@ public sealed class YouTubeVideoPoller(IRepository repository, ILogger<YouTubeVi
       using var reader = new StringReader(response);
       var deserialized = serializer.Deserialize(reader);
 
-      if (deserialized is not YouTubeFeed) {
+      if (deserialized is not YouTubeFeed feed) {
         logger.LogError("Failed to deserialize YouTube feed for channel {Channel}", channel.ChannelId);
         return;
       }
-
-      var feed = (YouTubeFeed) deserialized;
 
       foreach (var entry in feed.YouTubeFeedEntries) {
         if (string.IsNullOrEmpty(entry.Published)) {
