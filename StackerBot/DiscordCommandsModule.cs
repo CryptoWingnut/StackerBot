@@ -8,9 +8,9 @@ public sealed class DiscordCommandsModule(IExternals externals, IRepository repo
   [RequireRoles(RoleCheckMode.Any, Parameters.REQUIRED_ROLE)]
   public async Task AddYouTubeSubscription(CommandContext context, string channelName) {
     try {
-      var channelNameActual = channelName;
+      var channelNameActual = $"@{channelName}";
 
-      if (string.IsNullOrEmpty(channelName) && context.Message.MentionedUsers.Count > 0) {
+      if (channelNameActual == "@" && context.Message.MentionedUsers.Count > 0) {
         channelNameActual = $"@{context.Message.MentionedUsers[0].Username}";
       }
 
@@ -51,9 +51,9 @@ public sealed class DiscordCommandsModule(IExternals externals, IRepository repo
   [RequireRoles(RoleCheckMode.Any, Parameters.REQUIRED_ROLE)]
   public async Task RemoveYouTubeSubscription(CommandContext context, string channelName) {
     try {
-      var channelNameActual = channelName;
+      var channelNameActual = $"@{channelName}";
 
-      if (string.IsNullOrEmpty(channelName) && context.Message.MentionedUsers.Count > 0) {
+      if (channelNameActual == "@" && context.Message.MentionedUsers.Count > 0) {
         channelNameActual = $"@{context.Message.MentionedUsers[0].Username}";
       }
 
