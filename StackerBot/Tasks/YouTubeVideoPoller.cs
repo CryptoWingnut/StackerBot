@@ -52,7 +52,6 @@ public sealed class YouTubeVideoPoller(IRepository repository, ILogger<YouTubeVi
         }
 
         await eventBus.SendYouTubeChannelPost(channel.ChannelName.TrimStart('@'), $"https://www.youtube.com/watch?v={entry.VideoId}");
-        channel.LastVideo = published;
         await repository.UpdateLastVideoTime(channel.Id, published, CancellationToken.None);
       }
     }
