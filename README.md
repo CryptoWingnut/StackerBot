@@ -8,3 +8,4 @@ ENVIRONMENT VARIABLES
 - STACKERBOT_API_KEY   : API key to connect to Discord
 - YOUTUBE_CALLBACK_URL : Callback URL for the YouTube PubSubHubbub
 - GOOGLE_API_KEY       : API key to connect to Google
+- METALS_API_KEY       : API key to connect to Metals-API

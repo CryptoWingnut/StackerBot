@@ -35,11 +35,13 @@ builder.Services.AddSingleton<IRepository, Repository>();
 builder.Services.AddHostedService<DiscordBot>();
 
 builder.Services.AddTransient<YouTubeVideoPoller>();
+builder.Services.AddTransient<MetalsPricePoller>();
 
 var application = builder.Build();
 
 application.Services.UseScheduler(scheduler => {
   scheduler.Schedule<YouTubeVideoPoller>().EveryMinute();
+  scheduler.Schedule<MetalsPricePoller>().Cron("0 19 * * 5");
 });
 
 try {

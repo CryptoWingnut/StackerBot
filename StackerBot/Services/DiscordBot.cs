@@ -20,6 +20,7 @@ public sealed class DiscordBot : IHostedService, IDisposable {
     commands.RegisterCommands<DiscordCommandsModule>();
 
     eventBus.OnSendYouTubeChannelPostMessage += SendYouTubeChannelPost;
+    eventBus.OnSendMetalsPricePostMessage += SendMetalsPricePost;
   }
 
   public async Task StartAsync(CancellationToken cancellationToken) {
@@ -38,5 +39,10 @@ public sealed class DiscordBot : IHostedService, IDisposable {
   private async ValueTask SendYouTubeChannelPost(string channelName, string url) {
     var channel = await _client.GetChannelAsync(Parameters.YOUTUBE_CHANNEL_ID);
     await channel.SendMessageAsync($"New video from {channelName}: {url}");
+  }
+
+  private async ValueTask SendMetalsPricePost(string message) {
+    var channel = await _client.GetChannelAsync(Parameters.METALS_PRICE_CHANNEL_ID);
+    await channel.SendMessageAsync(message);
   }
 }
