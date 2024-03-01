@@ -21,6 +21,7 @@ public sealed class DiscordBot : IHostedService, IDisposable {
 
     eventBus.OnSendYouTubeChannelPostMessage += SendYouTubeChannelPost;
     eventBus.OnSendMetalsPricePostMessage += SendMetalsPricePost;
+    eventBus.OnSendCountdownPostMessage += SendCountdownPost;
   }
 
   public async Task StartAsync(CancellationToken cancellationToken) {
@@ -43,6 +44,11 @@ public sealed class DiscordBot : IHostedService, IDisposable {
 
   private async ValueTask SendMetalsPricePost(string message) {
     var channel = await _client.GetChannelAsync(Parameters.METALS_PRICE_CHANNEL_ID);
+    await channel.SendMessageAsync(message);
+  }
+
+  private async ValueTask SendCountdownPost(string message) {
+    var channel = await _client.GetChannelAsync(Parameters.COUNTDOWN_CHANNEL_ID);
     await channel.SendMessageAsync(message);
   }
 }
