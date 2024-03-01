@@ -45,6 +45,9 @@ public sealed class DiscordBot : IHostedService, IDisposable {
   private async ValueTask SendMetalsPricePost(string message) {
     var channel = await _client.GetChannelAsync(Parameters.METALS_PRICE_CHANNEL_ID);
     await channel.SendMessageAsync(message);
+
+    var stackerSocialChannel = await _client.GetChannelAsync(Parameters.STACKER_SOCIAL_CHANNEL_ID);
+    await stackerSocialChannel.SendMessageAsync(message);
   }
 
   private async ValueTask SendCountdownPost(string message) {
