@@ -16,7 +16,7 @@ public sealed class GiveawayCountdown(ILogger<GiveawayCountdown> logger, EventBu
 
   private async Task Handle() {
     var remaining = _targetTime - DateTime.UtcNow;
-    var message = $"{remaining.Hours}HOURS UNTIL THE MASSIVE GIVEAWAY{Environment.NewLine}Be sure to check out the live stream at: <https://www.youtube.com/@thestackcollector>";
+    var message = $"{remaining.Hours} HOURS UNTIL THE MASSIVE GIVEAWAY{Environment.NewLine}Be sure to check out the live stream at: <https://www.youtube.com/@thestackcollector>";
     await eventBus.SendCountdownPost(message);
   }
 }
