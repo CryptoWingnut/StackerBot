@@ -42,7 +42,7 @@ var application = builder.Build();
 
 application.Services.UseScheduler(scheduler => {
   scheduler.Schedule<YouTubeVideoPoller>().EveryMinute();
-  scheduler.Schedule<MetalsPricePoller>().Cron("0 19 * * 5");
+  scheduler.Schedule<MetalsPricePoller>().Cron("0 19 * * *");
   scheduler.Schedule<GiveawayCountdown>().Cron("0 * * * *");
 });
 
