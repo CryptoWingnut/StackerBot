@@ -78,4 +78,59 @@ public sealed class DiscordCommandsModule(IExternals externals, IRepository repo
       await context.RespondAsync("Error! Please notify Wingnut!");
     }
   }
+
+  [Command("add-email")]
+  [RequireRoles(RoleCheckMode.Any, Parameters.REQUIRED_ROLE)]
+  public async Task AddWhitelistedEmail(CommandContext context, string email) {
+    try {
+      var existingResult = await repository.IsEmailWhitelisted(email, CancellationToken.None);
+      if (existingResult.IsType(typeof(bool))) {
+        var existing = existingResult.GetT1;
+        if (existing) {
+          await context.RespondAsync($"Already whitelisted: {email}");
+          return;
+        }
+      }
+
+      var model = new WhitelistedEmailModel { Id = Guid.NewGuid(), Address = email };
+      var addedResponse = await repository.AddWhitelistedEmail(model, CancellationToken.None);
+
+      if (addedResponse.IsType(typeof(DatabaseError))) {
+        await context.RespondAsync("Error! Please notify Wingnut!");
+        return;
+      }
+
+      await context.RespondAsync($"Whitelisted: {email}");
+    } catch (Exception error) {
+      logger.LogError(error, "Exception occured while adding whitelisted email");
+      await context.RespondAsync("Error! Please notify Wingnut!");
+    }
+  }
+
+  [Command("remove-email")]
+  [RequireRoles(RoleCheckMode.Any, Parameters.REQUIRED_ROLE)]
+  public async Task RemoveWhitelistedEmail(CommandContext context, string email) {
+    try {
+      var existingResult = await repository.IsEmailWhitelisted(email, CancellationToken.None);
+      if (existingResult.IsType(typeof(bool))) {
+        var existing = existingResult.GetT1;
+        if (!existing) {
+          await context.RespondAsync($"Address not whitelisted: {email}");
+          return;
+        }
+      }
+
+      var removeResponse = await repository.RemoveWhitelistedEmail(email, CancellationToken.None);
+
+      if (removeResponse.IsType(typeof(DatabaseError))) {
+        await context.RespondAsync("Error! Please notify Wingnut!");
+        return;
+      }
+
+      await context.RespondAsync($"Removed whitelisted email: {email}");
+    } catch (Exception error) {
+      logger.LogError(error, "Exception occured while removing whitelisted email");
+      await context.RespondAsync("Error! Please notify Wingnut!");
+    }
+  }
 }

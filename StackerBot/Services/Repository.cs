@@ -41,20 +41,6 @@ public sealed class Repository(IDbContextFactory<DatabaseContext> factory, ILogg
     }
   }
 
-  public ValueTask<Union<YouTubeSubscriptionModel, NotFound, DatabaseError>> FindYouTubeSubscriptionById(string channelId, CancellationToken cancellationToken) {
-    return Executor(action, "find_youtube_subscription", cancellationToken);
-
-    async Task<Union<YouTubeSubscriptionModel, NotFound>> action(DatabaseContext context) {
-      var subscription = await context.YouTubeSubscriptions.FirstOrDefaultAsync(x => x.ChannelId == channelId, cancellationToken);
-
-      if (subscription is null) {
-        return NotFound.Instance;
-      }
-
-      return subscription;
-    }
-  }
-
   public async ValueTask<Union<List<YouTubeSubscriptionModel>, DatabaseError>> GetYouTubeSubscriptions(CancellationToken cancellationToken) {
     return await Executor(action, "get_youtube_subscriptions", cancellationToken);
 
@@ -75,6 +61,40 @@ public sealed class Repository(IDbContextFactory<DatabaseContext> factory, ILogg
 
       subscription.LastVideo = published;
       context.YouTubeSubscriptions.Update(subscription);
+      await context.SaveChangesAsync(cancellationToken);
+      return Success.Instance;
+    }
+  }
+
+  public async ValueTask<Union<bool, DatabaseError>> IsEmailWhitelisted(string email, CancellationToken cancellationToken) {
+    return await Executor(action, "is_email_whitelisted", cancellationToken);
+
+    async Task<bool> action(DatabaseContext context) {
+      return await context.WhitelistedEmails.AnyAsync(x => x.Address == email, cancellationToken);
+    }
+  }
+
+  public async ValueTask<Union<WhitelistedEmailModel, DatabaseError>> AddWhitelistedEmail(WhitelistedEmailModel model, CancellationToken cancellationToken) {
+    return await Executor(action, "add_whitelisted_email", cancellationToken);
+
+    async Task<WhitelistedEmailModel> action(DatabaseContext context) {
+      await context.WhitelistedEmails.AddAsync(model, cancellationToken);
+      await context.SaveChangesAsync(cancellationToken);
+      return model;
+    }
+  }
+
+  public async ValueTask<Union<Success, NotFound, DatabaseError>> RemoveWhitelistedEmail(string email, CancellationToken cancellationToken) {
+    return await Executor(action, "remove_whitelisted_email", cancellationToken);
+
+    async Task<Union<Success, NotFound>> action(DatabaseContext context) {
+      var current = await context.WhitelistedEmails.FirstOrDefaultAsync(x => x.Address == email, cancellationToken);
+
+      if (current is null) {
+        return NotFound.Instance;
+      }
+
+      context.WhitelistedEmails.Remove(current);
       await context.SaveChangesAsync(cancellationToken);
       return Success.Instance;
     }

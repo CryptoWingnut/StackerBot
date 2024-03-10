@@ -37,11 +37,13 @@ builder.Services.AddHostedService<DiscordBot>();
 builder.Services.AddTransient<YouTubeVideoPoller>();
 builder.Services.AddTransient<MetalsPricePoller>();
 builder.Services.AddTransient<GiveawayCountdown>();
+builder.Services.AddTransient<EmailChecker>();
 
 var application = builder.Build();
 
 application.Services.UseScheduler(scheduler => {
   scheduler.Schedule<YouTubeVideoPoller>().EveryMinute();
+  scheduler.Schedule<EmailChecker>().EveryMinute();
   scheduler.Schedule<MetalsPricePoller>().Cron("0 19 * * *");
   //scheduler.Schedule<GiveawayCountdown>().Cron("0 * * * *");
 });

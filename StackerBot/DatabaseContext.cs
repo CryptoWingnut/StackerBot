@@ -1,6 +1,7 @@
 ﻿namespace StackerBot;
 
 public sealed class DatabaseContext : DbContext {
+  public DbSet<WhitelistedEmailModel> WhitelistedEmails => Set<WhitelistedEmailModel>();
   public DbSet<YouTubeSubscriptionModel> YouTubeSubscriptions => Set<YouTubeSubscriptionModel>();
 
   public DatabaseContext() {}
