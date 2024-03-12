@@ -1,4 +1,10 @@
-﻿using Coravel.Invocable;
+﻿using System.Text;
+using System.Text.RegularExpressions;
+
+using Coravel.Invocable;
+
+using HtmlAgilityPack;
+
 using MailKit;
 using MailKit.Net.Imap;
 using MailKit.Search;
@@ -6,7 +12,7 @@ using StackerBot.Services;
 
 namespace StackerBot.Tasks;
 
-public sealed class EmailChecker(ILogger<EmailChecker> logger, IRepository repository, EventBus eventBus) : IInvocable {
+public sealed partial class EmailChecker(ILogger<EmailChecker> logger, IRepository repository, EventBus eventBus) : IInvocable {
   public async Task Invoke() {
     try {
       await Handle();
@@ -46,9 +52,76 @@ public sealed class EmailChecker(ILogger<EmailChecker> logger, IRepository repos
         continue;
       }
 
-      logger.LogInformation("Sending breaking news from: {Sender}", sender);
-      await eventBus.SendBreakingNews(sender, message.Subject, message.TextBody);
+      var htmlDoc = new HtmlDocument();
+      htmlDoc.LoadHtml(message.HtmlBody ?? "");
+      var formattedText = ConvertHtmlToPlainText(htmlDoc.DocumentNode);
+
+      await eventBus.SendBreakingNews(sender, formattedText);
       await inbox.AddFlagsAsync(uid, MessageFlags.Seen, true, CancellationToken.None);
     }
   }
+
+  private static int _counter;
+
+  private static string ConvertHtmlToPlainText(HtmlNode node) {
+    var sb = new StringBuilder();
+
+    foreach (var childNode in node.ChildNodes) {
+      switch (childNode.NodeType) {
+        case HtmlNodeType.Element:
+          switch (childNode.Name) {
+            case "meta":
+            case "style":
+            case "link":
+              break;
+
+            case "html":
+            case "head":
+            case "title":
+            case "body":
+            case "center":
+            case "table":
+            case "tbody":
+            case "tr":
+            case "td":
+            case "div":
+            case "p":
+            case "span":
+            case "strong":
+            case "colgroup":
+            case "col":
+            case "h1":
+            case "br":
+            case "img":
+              sb.Append(ConvertHtmlToPlainText(childNode));
+              break;
+
+            case "a":
+              if (childNode.Attributes["href"] != null) {
+                sb.AppendLine($"<{childNode.Attributes["href"].Value}>");
+              }
+              break;
+
+            default:
+              Console.WriteLine("UNKNOWN NODE: " + childNode.Name);
+              Console.WriteLine("CHILDREN: " + childNode.ChildNodes.Count);
+              Console.WriteLine(childNode.InnerText);
+              Console.WriteLine("====");
+              sb.Append(ConvertHtmlToPlainText(childNode));
+              break;
+          }
+          break;
+        case HtmlNodeType.Text:
+          sb.AppendLine(childNode.InnerText);
+          break;
+      }
+    }
+
+    var result = sb.ToString();
+    result = RemoveExtraLineBreaks().Replace(result, "\n\n");
+    return result;
+  }
+
+  [GeneratedRegex(@"\n{3,}")]
+  private static partial Regex RemoveExtraLineBreaks();
 }

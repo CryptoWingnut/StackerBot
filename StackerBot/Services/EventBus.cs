@@ -9,7 +9,7 @@ public sealed class EventBus {
   public delegate ValueTask SendYouTubeChannelPostMessage(string channelName, string url);
   public delegate ValueTask SendMetalsPricePostMessage(string message);
   public delegate ValueTask SendCountdownPostMessage(string message);
-  public delegate ValueTask SendBreakingNewsMessage(string from, string subject, string body);
+  public delegate ValueTask SendBreakingNewsMessage(string from, string body);
 
   public async ValueTask SendYouTubeChannelPost(string channelName, string url) {
     if (OnSendYouTubeChannelPostMessage is not null) {
@@ -29,9 +29,9 @@ public sealed class EventBus {
     }
   }
 
-  public async ValueTask SendBreakingNews(string from, string subject, string body) {
+  public async ValueTask SendBreakingNews(string from, string body) {
     if (OnSendBreakingNewsMessage is not null) {
-      await OnSendBreakingNewsMessage(from, subject, body);
+      await OnSendBreakingNewsMessage(from, body);
     }
   }
 }

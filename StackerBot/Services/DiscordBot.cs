@@ -57,12 +57,10 @@ public sealed class DiscordBot : IHostedService, IDisposable {
     await channel.SendMessageAsync(message);
   }
 
-  private async ValueTask SendBreakingNews(string from, string subject, string body) {
+  private async ValueTask SendBreakingNews(string from, string body) {
     var channel = await _client.GetChannelAsync(Parameters.BREAKING_NEWS_CHANNEL_ID);
     var message = new StringBuilder();
     message.AppendLine($"NEWS FROM : {from}");
-    message.AppendLine();
-    message.AppendLine($"Subject: {subject}");
     message.AppendLine();
     message.AppendLine(body);
 
