@@ -13,6 +13,8 @@ using StackerBot.Services;
 namespace StackerBot.Tasks;
 
 public sealed partial class EmailChecker(ILogger<EmailChecker> logger, IRepository repository, EventBus eventBus) : IInvocable {
+  private readonly HttpClient _client = new();
+
   public async Task Invoke() {
     try {
       await Handle();
@@ -61,9 +63,7 @@ public sealed partial class EmailChecker(ILogger<EmailChecker> logger, IReposito
     }
   }
 
-  private static int _counter;
-
-  private static string ConvertHtmlToPlainText(HtmlNode node) {
+  private string ConvertHtmlToPlainText(HtmlNode node) {
     var sb = new StringBuilder();
 
     foreach (var childNode in node.ChildNodes) {
@@ -91,14 +91,26 @@ public sealed partial class EmailChecker(ILogger<EmailChecker> logger, IReposito
             case "colgroup":
             case "col":
             case "h1":
+            case "h2":
+            case "h3":
+            case "h4":
+            case "h5":
+            case "h6":
             case "br":
             case "img":
+            case "font":
+            case "em":
+            case "sup":
               sb.Append(ConvertHtmlToPlainText(childNode));
               break;
 
             case "a":
               if (childNode.Attributes["href"] != null) {
-                sb.AppendLine($"<{childNode.Attributes["href"].Value}>");
+                if (!childNode.InnerText.StartsWith("http")) {
+                  sb.Append($"{childNode.InnerText} ");
+                }
+                var shortUrl = ShortenUrl(childNode.Attributes["href"].Value).GetAwaiter().GetResult();
+                sb.AppendLine($"<{shortUrl}>");
               }
               break;
 
@@ -122,6 +134,12 @@ public sealed partial class EmailChecker(ILogger<EmailChecker> logger, IReposito
     return result;
   }
 
-  [GeneratedRegex(@"\n{3,}")]
+  private async Task<string> ShortenUrl(string url) {
+    var apiUrl = $"https://is.gd/create.php?format=simple&url={Uri.EscapeDataString(url)}";
+    var response = await _client.GetStringAsync(apiUrl);
+    return response;
+  }
+
+  [GeneratedRegex(@"(\s*(\r?\n|\r)\s*){2,}")]
   private static partial Regex RemoveExtraLineBreaks();
 }
