@@ -107,7 +107,7 @@ public sealed partial class EmailChecker(ILogger<EmailChecker> logger, IReposito
             case "a":
               if (childNode.Attributes["href"] != null) {
                 if (!childNode.InnerText.StartsWith("http")) {
-                  sb.Append($"{childNode.InnerText} ");
+                  sb.Append($"{HtmlEntity.DeEntitize(childNode.InnerText).TrimStart(' ').TrimEnd(' ')} ");
                 }
                 var shortUrl = ShortenUrl(childNode.Attributes["href"].Value).GetAwaiter().GetResult();
                 sb.AppendLine($"<{shortUrl}>");
@@ -124,7 +124,7 @@ public sealed partial class EmailChecker(ILogger<EmailChecker> logger, IReposito
           }
           break;
         case HtmlNodeType.Text:
-          sb.AppendLine(childNode.InnerText);
+          sb.AppendLine(HtmlEntity.DeEntitize(childNode.InnerText).TrimStart(' ').TrimEnd(' '));
           break;
       }
     }

@@ -61,7 +61,6 @@ public sealed class DiscordBot : IHostedService, IDisposable {
     var channel = await _client.GetChannelAsync(Parameters.BREAKING_NEWS_CHANNEL_ID);
     var message = new StringBuilder();
     message.AppendLine($"NEWS FROM : {from}");
-    message.AppendLine();
     message.AppendLine(body);
 
     if (message.Length > 2000) {
