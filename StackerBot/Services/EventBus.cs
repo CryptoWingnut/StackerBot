@@ -1,15 +1,19 @@
-﻿namespace StackerBot.Services;
+﻿using DSharpPlus.Entities;
+
+namespace StackerBot.Services;
 
 public sealed class EventBus {
   public event SendYouTubeChannelPostMessage? OnSendYouTubeChannelPostMessage;
   public event SendMetalsPricePostMessage? OnSendMetalsPricePostMessage;
   public event SendCountdownPostMessage? OnSendCountdownPostMessage;
   public event SendBreakingNewsMessage? OnSendBreakingNewsMessage;
+  public event GetInvites? OnGetInvites;
 
   public delegate ValueTask SendYouTubeChannelPostMessage(string channelName, string url);
   public delegate ValueTask SendMetalsPricePostMessage(string message);
   public delegate ValueTask SendCountdownPostMessage(string message);
   public delegate ValueTask SendBreakingNewsMessage(string from, string body);
+  public delegate ValueTask<IReadOnlyList<DiscordInvite>> GetInvites();
 
   public async ValueTask SendYouTubeChannelPost(string channelName, string url) {
     if (OnSendYouTubeChannelPostMessage is not null) {
@@ -33,5 +37,13 @@ public sealed class EventBus {
     if (OnSendBreakingNewsMessage is not null) {
       await OnSendBreakingNewsMessage(from, body);
     }
+  }
+
+  public async ValueTask<IReadOnlyList<DiscordInvite>> GetServerInvites() {
+    if (OnGetInvites is not null) {
+      return await OnGetInvites();
+    }
+
+    return [];
   }
 }

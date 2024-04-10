@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
+using DSharpPlus.Entities;
 
 namespace StackerBot.Services;
 
@@ -24,6 +25,7 @@ public sealed class DiscordBot : IHostedService, IDisposable {
     eventBus.OnSendMetalsPricePostMessage += SendMetalsPricePost;
     eventBus.OnSendCountdownPostMessage += SendCountdownPost;
     eventBus.OnSendBreakingNewsMessage += SendBreakingNews;
+    eventBus.OnGetInvites += GetInvites;
   }
 
   public async Task StartAsync(CancellationToken cancellationToken) {
@@ -37,6 +39,11 @@ public sealed class DiscordBot : IHostedService, IDisposable {
   public void Dispose() {
     _client.DisconnectAsync();
     _client.Dispose();
+  }
+
+  private async ValueTask<IReadOnlyList<DiscordInvite>> GetInvites() {
+    var server = await _client.GetGuildAsync(Parameters.STACKER_SOCIAL_SERVER_ID);
+    return await server.GetInvitesAsync();
   }
 
   private async ValueTask SendYouTubeChannelPost(string channelName, string url) {
