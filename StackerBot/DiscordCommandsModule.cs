@@ -43,8 +43,10 @@ public sealed class DiscordCommandsModule(IExternals externals, IRepository repo
       var total = sortedLeaderboard.Count > 10 ? 10 : sortedLeaderboard.Count;
 
       for (var i = 0; i < total; i++) {
-        var user = await context.Guild.GetMemberAsync(sortedLeaderboard[i].Key);
-        response.AppendLine($"{i + 1} :: {user.Username} - {sortedLeaderboard[i].Value} INVITED");
+        var user = await eventBus.GetMember(sortedLeaderboard[i].Key);
+        if (user is not null) {
+          response.AppendLine($"{i + 1} :: {user.Username} - {sortedLeaderboard[i].Value} INVITED");
+        }
       }
 
       await context.RespondAsync(response.ToString());

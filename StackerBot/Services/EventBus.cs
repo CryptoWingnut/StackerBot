@@ -8,12 +8,16 @@ public sealed class EventBus {
   public event SendCountdownPostMessage? OnSendCountdownPostMessage;
   public event SendBreakingNewsMessage? OnSendBreakingNewsMessage;
   public event GetInvites? OnGetInvites;
+  public event GetDiscordMember? OnGetMember;
+  public event SendWeeklyLeaderboard? OnSendWeeklyLeaderboard;
 
   public delegate ValueTask SendYouTubeChannelPostMessage(string channelName, string url);
   public delegate ValueTask SendMetalsPricePostMessage(string message);
   public delegate ValueTask SendCountdownPostMessage(string message);
   public delegate ValueTask SendBreakingNewsMessage(string from, string body);
   public delegate ValueTask<IReadOnlyList<DiscordInvite>> GetInvites();
+  public delegate ValueTask<DiscordMember?> GetDiscordMember(ulong id);
+  public delegate ValueTask SendWeeklyLeaderboard(string leaderboard);
 
   public async ValueTask SendYouTubeChannelPost(string channelName, string url) {
     if (OnSendYouTubeChannelPostMessage is not null) {
@@ -45,5 +49,19 @@ public sealed class EventBus {
     }
 
     return [];
+  }
+
+  public async ValueTask<DiscordMember?> GetMember(ulong id) {
+    if (OnGetMember is not null) {
+      return await OnGetMember(id);
+    }
+
+    return null;
+  }
+
+  public async ValueTask SendInvitesLeaderboard(string leaderboard) {
+    if (OnSendWeeklyLeaderboard is not null) {
+      await OnSendWeeklyLeaderboard(leaderboard);
+    }
   }
 }

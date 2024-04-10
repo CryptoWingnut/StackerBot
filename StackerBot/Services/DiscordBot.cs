@@ -26,6 +26,8 @@ public sealed class DiscordBot : IHostedService, IDisposable {
     eventBus.OnSendCountdownPostMessage += SendCountdownPost;
     eventBus.OnSendBreakingNewsMessage += SendBreakingNews;
     eventBus.OnGetInvites += GetInvites;
+    eventBus.OnGetMember += GetDiscordMember;
+    eventBus.OnSendWeeklyLeaderboard += SendWeeklyLeaderboard;
   }
 
   public async Task StartAsync(CancellationToken cancellationToken) {
@@ -39,6 +41,11 @@ public sealed class DiscordBot : IHostedService, IDisposable {
   public void Dispose() {
     _client.DisconnectAsync();
     _client.Dispose();
+  }
+
+  private async ValueTask<DiscordMember?> GetDiscordMember(ulong id) {
+    var server = await _client.GetGuildAsync(Parameters.STACKER_SOCIAL_SERVER_ID);
+    return await server.GetMemberAsync(id);
   }
 
   private async ValueTask<IReadOnlyList<DiscordInvite>> GetInvites() {
@@ -75,5 +82,13 @@ public sealed class DiscordBot : IHostedService, IDisposable {
     }
 
     await channel.SendMessageAsync(message.ToString());
+  }
+
+  private async ValueTask SendWeeklyLeaderboard(string leaderboard) {
+    var channel = await _client.GetChannelAsync(Parameters.WEEKLY_LEADERBOARD_CHANNEL_ID);
+    await channel.SendMessageAsync(leaderboard);
+
+    var stackerSocialChannel = await _client.GetChannelAsync(Parameters.STACKER_SOCIAL_CHANNEL_ID);
+    await stackerSocialChannel.SendMessageAsync(leaderboard);
   }
 }
