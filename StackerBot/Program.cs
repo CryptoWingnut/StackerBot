@@ -36,18 +36,18 @@ builder.Services.AddHostedService<DiscordBot>();
 
 builder.Services.AddTransient<YouTubeVideoPoller>();
 builder.Services.AddTransient<MetalsPricePoller>();
-builder.Services.AddTransient<EmailChecker>();
 builder.Services.AddTransient<WeeklyInvitesLeaderboard>();
 //builder.Services.AddTransient<GiveawayCountdown>();
+//builder.Services.AddTransient<EmailChecker>();
 
 var application = builder.Build();
 
 application.Services.UseScheduler(scheduler => {
   scheduler.Schedule<YouTubeVideoPoller>().EveryMinute();
-  scheduler.Schedule<EmailChecker>().EveryMinute();
   scheduler.Schedule<MetalsPricePoller>().Cron("0 19 * * *");
   scheduler.Schedule<WeeklyInvitesLeaderboard>().Cron("0 10 * * 4");
   //scheduler.Schedule<GiveawayCountdown>().Cron("0 * * * *");
+  //scheduler.Schedule<EmailChecker>().EveryMinute();
 });
 
 try {
