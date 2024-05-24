@@ -23,7 +23,7 @@ public sealed class DiscordCommandsModule(IExternals externals, IRepository repo
           continue;
         }
 
-        list.AppendLine(member.DisplayName);
+        list.AppendLine(member.Nickname ?? member.DisplayName ?? member.Username);
       }
 
       var message = new MimeMessage();
