@@ -1,4 +1,5 @@
-﻿using DSharpPlus.Entities;
+﻿using DSharpPlus;
+using DSharpPlus.Entities;
 
 namespace StackerBot.Services;
 
@@ -10,6 +11,8 @@ public sealed class EventBus {
   public event GetInvites? OnGetInvites;
   public event GetDiscordMember? OnGetMember;
   public event SendWeeklyLeaderboard? OnSendWeeklyLeaderboard;
+  public event GetServerTier? OnGetServerTier;
+  public event SendAdminAlert? OnSendAdminAlert;
 
   public delegate ValueTask SendYouTubeChannelPostMessage(string channelName, string url);
   public delegate ValueTask SendMetalsPricePostMessage(string message);
@@ -18,6 +21,8 @@ public sealed class EventBus {
   public delegate ValueTask<IReadOnlyList<DiscordInvite>> GetInvites();
   public delegate ValueTask<DiscordMember?> GetDiscordMember(ulong id);
   public delegate ValueTask SendWeeklyLeaderboard(string leaderboard);
+  public delegate ValueTask<PremiumTier> GetServerTier();
+  public delegate ValueTask SendAdminAlert(string message);
 
   public async ValueTask SendYouTubeChannelPost(string channelName, string url) {
     if (OnSendYouTubeChannelPostMessage is not null) {
@@ -62,6 +67,20 @@ public sealed class EventBus {
   public async ValueTask SendInvitesLeaderboard(string leaderboard) {
     if (OnSendWeeklyLeaderboard is not null) {
       await OnSendWeeklyLeaderboard(leaderboard);
+    }
+  }
+
+  public async ValueTask<PremiumTier> GetCurrentServerTier() {
+    if (OnGetServerTier is not null) {
+      return await OnGetServerTier();
+    }
+
+    return PremiumTier.None;
+  }
+
+  public async ValueTask SendAlert(string message) {
+    if (OnSendAdminAlert is not null) {
+      await OnSendAdminAlert(message);
     }
   }
 }

@@ -48,57 +48,8 @@ public sealed class DiscordCommandsModule(IExternals externals, IRepository repo
     }
   }
 
-  [Command("invites")]
-  public async Task GetInviteLeaderboard(CommandContext context) {
-    try {
-      if (context.Channel.Id != Parameters.STACKER_SOCIAL_CHANNEL_ID) {
-        return;
-      }
-
-      if (DateTime.UtcNow < _inviteLeaderboardAntispam.AddHours(2)) {
-        return;
-      }
-
-      var invites = await eventBus.GetServerInvites();
-      var leaderboard = new Dictionary<ulong, int>();
-
-      foreach (var invite in invites) {
-        if (invite.Uses == 0) {
-          continue;
-        }
-
-        if (leaderboard.ContainsKey(invite.Inviter.Id)) {
-          leaderboard[invite.Inviter.Id] += invite.Uses;
-        } else {
-          leaderboard[invite.Inviter.Id] = invite.Uses;
-        }
-      }
-
-      var sortedLeaderboard = leaderboard.OrderByDescending(x => x.Value).ToList();
-
-      var response = new StringBuilder();
-      response.AppendLine("SERVER INVITE LEADERBOARD");
-      response.AppendLine("-------------------------");
-
-      var total = sortedLeaderboard.Count > 10 ? 10 : sortedLeaderboard.Count;
-
-      for (var i = 0; i < total; i++) {
-        var user = await eventBus.GetMember(sortedLeaderboard[i].Key);
-        if (user is not null) {
-          response.AppendLine($"{i + 1} :: {user.Username} - {sortedLeaderboard[i].Value} INVITED");
-        }
-      }
-
-      await context.RespondAsync(response.ToString());
-      _inviteLeaderboardAntispam = DateTime.UtcNow;
-    } catch (Exception error) {
-      logger.LogError(error, "Exception occured while processing invite leaderboard");
-      await context.RespondAsync("Error! Please notify Wingnut!");
-    }
-  }
-
   [Command("add-yt")]
-  [RequireRoles(RoleCheckMode.Any, Parameters.REQUIRED_ROLE)]
+  [RequireRoles(RoleCheckMode.Any, Parameters.REQUIRED_ROLE, Parameters.MODERATOR_ROLE)]
   public async Task AddYouTubeSubscription(CommandContext context, string channelName) {
     try {
       var channelNameActual = $"@{channelName}";
@@ -141,7 +92,7 @@ public sealed class DiscordCommandsModule(IExternals externals, IRepository repo
   }
 
   [Command("remove-yt")]
-  [RequireRoles(RoleCheckMode.Any, Parameters.REQUIRED_ROLE)]
+  [RequireRoles(RoleCheckMode.Any, Parameters.REQUIRED_ROLE, Parameters.MODERATOR_ROLE)]
   public async Task RemoveYouTubeSubscription(CommandContext context, string channelName) {
     try {
       var channelNameActual = $"@{channelName}";

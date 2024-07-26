@@ -2,6 +2,9 @@
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
+using DSharpPlus.Interactivity.Enums;
+using DSharpPlus.Interactivity.Extensions;
+using DSharpPlus.SlashCommands;
 
 namespace StackerBot.Services;
 
@@ -18,8 +21,13 @@ public sealed class DiscordBot : IHostedService, IDisposable {
       }
     );
 
+    var slashCommands = _client.UseSlashCommands(new() { Services = services });
+    slashCommands.RegisterCommands<AuctionCommandsModule>(Parameters.WINGNUTS_TEST_SERVER_ID);
+
     var commands = _client.UseCommandsNext(new() { StringPrefixes = new[] { "!" }, Services = services });
     commands.RegisterCommands<DiscordCommandsModule>();
+
+    _client.UseInteractivity(new() { PollBehaviour = PollBehaviour.KeepEmojis, Timeout = TimeSpan.FromMinutes(5) });
 
     eventBus.OnSendYouTubeChannelPostMessage += SendYouTubeChannelPost;
     eventBus.OnSendMetalsPricePostMessage += SendMetalsPricePost;
@@ -28,6 +36,8 @@ public sealed class DiscordBot : IHostedService, IDisposable {
     eventBus.OnGetInvites += GetInvites;
     eventBus.OnGetMember += GetDiscordMember;
     eventBus.OnSendWeeklyLeaderboard += SendWeeklyLeaderboard;
+    eventBus.OnGetServerTier += GetServerTier;
+    eventBus.OnSendAdminAlert += SendAdminAlert;
   }
 
   public async Task StartAsync(CancellationToken cancellationToken) {
@@ -90,5 +100,15 @@ public sealed class DiscordBot : IHostedService, IDisposable {
 
     var stackerSocialChannel = await _client.GetChannelAsync(Parameters.STACKER_SOCIAL_CHANNEL_ID);
     await stackerSocialChannel.SendMessageAsync(leaderboard);
+  }
+
+  private async ValueTask<PremiumTier> GetServerTier() {
+    var server = await _client.GetGuildAsync(Parameters.STACKER_SOCIAL_SERVER_ID);
+    return server.PremiumTier;
+  }
+
+  private async ValueTask SendAdminAlert(string message) {
+    var channel = await _client.GetChannelAsync(Parameters.STAFF_ROOM_CHANNEL_ID);
+    await channel.SendMessageAsync($"@here ALERT! {message}");
   }
 }
