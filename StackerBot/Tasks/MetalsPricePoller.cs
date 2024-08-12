@@ -26,12 +26,18 @@ public sealed class MetalsPricePoller(ILogger<MetalsPricePoller> logger, EventBu
 
     var cad = json.RootElement.GetProperty("currencies").GetProperty("CAD").GetDecimal();
     var gbp = json.RootElement.GetProperty("currencies").GetProperty("GBP").GetDecimal();
+    var eur = json.RootElement.GetProperty("currencies").GetProperty("EUR").GetDecimal();
 
     var goldCad = goldUsd / cad;
     var silverCad = silverUsd / cad;
 
     var goldGbp = goldUsd / gbp;
     var silverGbp = silverUsd / gbp;
+
+    var goldEur = goldUsd / eur;
+    var silverEur = silverUsd / eur;
+
+    var gsr = goldUsd / silverUsd;
 
     var message = new StringBuilder();
 
@@ -41,11 +47,15 @@ public sealed class MetalsPricePoller(ILogger<MetalsPricePoller> logger, EventBu
     message.AppendLine($"£{goldGbp.ToString("F2")} [GBP]");
     message.AppendLine($"${goldUsd.ToString("F2")} [USD]");
     message.AppendLine($"${goldCad.ToString("F2")} [CAD]");
+    message.AppendLine($"€{goldEur.ToString("F2")} [EUR]");
     message.AppendLine("");
     message.AppendLine("SILVER");
     message.AppendLine($"£{silverGbp.ToString("F2")} [GBP]");
     message.AppendLine($"${silverUsd.ToString("F2")} [USD]");
     message.AppendLine($"${silverCad.ToString("F2")} [CAD]");
+    message.AppendLine($"€{silverEur.ToString("F2")} [EUR]");
+    message.AppendLine("");
+    message.AppendLine($"GSR: {gsr.ToString("F1")}");
 
     await eventBus.SendMetalsPricePost(message.ToString());
   }
