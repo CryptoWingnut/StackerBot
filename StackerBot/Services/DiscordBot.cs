@@ -2,6 +2,7 @@
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
+using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity.Enums;
 using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
@@ -38,6 +39,8 @@ public sealed class DiscordBot : IHostedService, IDisposable {
     eventBus.OnSendWeeklyLeaderboard += SendWeeklyLeaderboard;
     eventBus.OnGetServerTier += GetServerTier;
     eventBus.OnSendAdminAlert += SendAdminAlert;
+
+    _client.GuildMemberAdded += OnUserJoinServer;
   }
 
   public async Task StartAsync(CancellationToken cancellationToken) {
@@ -51,6 +54,21 @@ public sealed class DiscordBot : IHostedService, IDisposable {
   public void Dispose() {
     _client.DisconnectAsync();
     _client.Dispose();
+  }
+
+  private async Task OnUserJoinServer(DiscordClient _, GuildMemberAddEventArgs args) {
+    if (args.Guild.Id != Parameters.STACKER_SOCIAL_SERVER_ID) {
+      return;
+    }
+
+    var message = $"""
+                   Hello {args.Member.Mention} & Welcome to Stackers Social!
+                   Here we talk about Gold & Silver, as well as other investments.
+                   Please feel free to take a look around and introduce yourself here: https://discord.com/channels/1197631472752939128/1198268080330129470
+                   """;
+
+    var channel = await _client.GetChannelAsync(Parameters.STACKER_SOCIAL_CHANNEL_ID);
+    await channel.SendMessageAsync(message);
   }
 
   private async ValueTask<DiscordMember?> GetDiscordMember(ulong id) {
