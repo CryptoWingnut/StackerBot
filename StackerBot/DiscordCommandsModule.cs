@@ -1,19 +1,14 @@
 ﻿using System.Text;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
-using MailKit.Net.Smtp;
-using MailKit.Security;
-using MimeKit;
-using StackerBot.Services;
+using DSharpPlus.Entities;
 
 namespace StackerBot;
 
-public sealed class DiscordCommandsModule(IExternals externals, IRepository repository, ILogger<DiscordCommandsModule> logger, EventBus eventBus) : BaseCommandModule {
-  private static DateTime _inviteLeaderboardAntispam = DateTime.MinValue;
-
+public sealed class DiscordCommandsModule(IExternals externals, IRepository repository, ILogger<DiscordCommandsModule> logger) : BaseCommandModule {
   [Command("member-list")]
   [RequireRoles(RoleCheckMode.Any, Parameters.REQUIRED_ROLE)]
-  public async Task GetMemberList(CommandContext context, string email) {
+  public async Task GetMemberList(CommandContext context) {
     try {
       var members = await context.Guild.GetAllMembersAsync();
       var list = new StringBuilder();
@@ -26,22 +21,14 @@ public sealed class DiscordCommandsModule(IExternals externals, IRepository repo
         list.AppendLine(member.Nickname ?? member.DisplayName ?? member.Username);
       }
 
-      var message = new MimeMessage();
-      message.From.Add(new MailboxAddress("SSBot", "stackerbot0@gmail.com"));
-      message.To.Add(new MailboxAddress("", email));
-      message.Subject = "Stacker Social Member List";
+      var bytes = Encoding.UTF8.GetBytes(list.ToString());
+      using var stream = new MemoryStream(bytes);
 
-      message.Body = new TextPart("plain") {
-        Text = list.ToString()
-      };
+      var builder = new DiscordMessageBuilder()
+        .WithContent("Here is the member list!")
+        .AddFile("member-list.txt", stream);
 
-      using var client = new SmtpClient();
-      await client.ConnectAsync("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
-      await client.AuthenticateAsync("stackerbot0@gmail.com", Environment.GetEnvironmentVariable("EMAIL_PASSWORD"));
-      await client.SendAsync(message);
-      await client.DisconnectAsync(true);
-
-      await context.RespondAsync("Member list has been emailed");
+      await context.RespondAsync(builder);
     } catch (Exception error) {
       logger.LogError(error, "Exception occured while generating member list");
       await context.RespondAsync("Error! Please notify Wingnut!");
