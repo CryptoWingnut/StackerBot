@@ -39,6 +39,7 @@ public sealed class DiscordBot : IHostedService, IDisposable {
     eventBus.OnSendWeeklyLeaderboard += SendWeeklyLeaderboard;
     eventBus.OnGetServerTier += GetServerTier;
     eventBus.OnSendAdminAlert += SendAdminAlert;
+    eventBus.OnSendCryptoPricePostMessage += SendCryptoPricePost;
 
     _client.GuildMemberAdded += OnUserJoinServer;
   }
@@ -65,6 +66,7 @@ public sealed class DiscordBot : IHostedService, IDisposable {
                    Hello {args.Member.Mention} & Welcome to Stackers Social!
                    Here we talk about Gold & Silver, as well as other investments.
                    Please feel free to take a look around and introduce yourself here: https://discord.com/channels/1197631472752939128/1198268080330129470
+                   Make sure to check out the server rules here: https://discord.com/channels/1197631472752939128/1198265995282890854
                    """;
 
     var channel = await _client.GetChannelAsync(Parameters.STACKER_SOCIAL_CHANNEL_ID);
@@ -92,6 +94,11 @@ public sealed class DiscordBot : IHostedService, IDisposable {
 
     var stackerSocialChannel = await _client.GetChannelAsync(Parameters.STACKER_SOCIAL_CHANNEL_ID);
     await stackerSocialChannel.SendMessageAsync(message);
+  }
+
+  private async ValueTask SendCryptoPricePost(string message) {
+    var channel = await _client.GetChannelAsync(Parameters.CRYPTO_PRICE_CHANNEL_ID);
+    await channel.SendMessageAsync(message);
   }
 
   private async ValueTask SendCountdownPost(string message) {

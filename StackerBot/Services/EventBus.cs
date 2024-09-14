@@ -6,6 +6,7 @@ namespace StackerBot.Services;
 public sealed class EventBus {
   public event SendYouTubeChannelPostMessage? OnSendYouTubeChannelPostMessage;
   public event SendMetalsPricePostMessage? OnSendMetalsPricePostMessage;
+  public event SendCryptoPricePostMessage? OnSendCryptoPricePostMessage;
   public event SendCountdownPostMessage? OnSendCountdownPostMessage;
   public event SendBreakingNewsMessage? OnSendBreakingNewsMessage;
   public event GetInvites? OnGetInvites;
@@ -16,6 +17,7 @@ public sealed class EventBus {
 
   public delegate ValueTask SendYouTubeChannelPostMessage(string channelName, string url);
   public delegate ValueTask SendMetalsPricePostMessage(string message);
+  public delegate ValueTask SendCryptoPricePostMessage(string message);
   public delegate ValueTask SendCountdownPostMessage(string message);
   public delegate ValueTask SendBreakingNewsMessage(string from, string body);
   public delegate ValueTask<IReadOnlyList<DiscordInvite>> GetInvites();
@@ -33,6 +35,12 @@ public sealed class EventBus {
   public async ValueTask SendMetalsPricePost(string message) {
     if (OnSendMetalsPricePostMessage is not null) {
       await OnSendMetalsPricePostMessage(message);
+    }
+  }
+
+  public async ValueTask SendCryptoPricePost(string message) {
+    if (OnSendCryptoPricePostMessage is not null) {
+      await OnSendCryptoPricePostMessage(message);
     }
   }
 
