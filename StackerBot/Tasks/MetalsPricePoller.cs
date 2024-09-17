@@ -27,6 +27,7 @@ public sealed class MetalsPricePoller(ILogger<MetalsPricePoller> logger, EventBu
 
     var goldUsd = json.RootElement.GetProperty("metals").GetProperty("gold").GetDecimal();
     var silverUsd = json.RootElement.GetProperty("metals").GetProperty("silver").GetDecimal();
+    var platinumUsd = json.RootElement.GetProperty("metals").GetProperty("platinum").GetDecimal();
 
     var cad = json.RootElement.GetProperty("currencies").GetProperty("CAD").GetDecimal();
     var gbp = json.RootElement.GetProperty("currencies").GetProperty("GBP").GetDecimal();
@@ -34,12 +35,15 @@ public sealed class MetalsPricePoller(ILogger<MetalsPricePoller> logger, EventBu
 
     var goldCad = goldUsd / cad;
     var silverCad = silverUsd / cad;
+    var platinumCad = platinumUsd / cad;
 
     var goldGbp = goldUsd / gbp;
     var silverGbp = silverUsd / gbp;
+    var platinumGbp = platinumUsd / gbp;
 
     var goldEur = goldUsd / eur;
     var silverEur = silverUsd / eur;
+    var platinumEur = platinumUsd / eur;
 
     var gsr = goldUsd / silverUsd;
 
@@ -58,6 +62,12 @@ public sealed class MetalsPricePoller(ILogger<MetalsPricePoller> logger, EventBu
     message.AppendLine($"${silverUsd.ToString("N2")} [USD]");
     message.AppendLine($"${silverCad.ToString("N2")} [CAD]");
     message.AppendLine($"€{silverEur.ToString("N2")} [EUR]");
+    message.AppendLine("");
+    message.AppendLine("PLATINUM");
+    message.AppendLine($"£{platinumGbp.ToString("N2")} [GBP]");
+    message.AppendLine($"${platinumUsd.ToString("N2")} [USD]");
+    message.AppendLine($"${platinumCad.ToString("N2")} [CAD]");
+    message.AppendLine($"€{platinumEur.ToString("N2")} [EUR]");
     message.AppendLine("");
     message.AppendLine($"GSR: {gsr.ToString("F1")}");
 
