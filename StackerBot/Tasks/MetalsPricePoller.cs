@@ -12,26 +12,26 @@ public sealed class MetalsPricePoller(ILogger<MetalsPricePoller> logger, EventBu
 
   public async Task Invoke() {
     try {
-      await Handle();
+      await HandleMetals();
     } catch (Exception error) {
       logger.LogError(error, "Exception occured while polling metals prices");
     }
   }
 
-  private async Task Handle() {
+  private async Task HandleMetals() {
     var client = new HttpClient();
 
-    var response = await client.GetAsync($"https://api.metals.dev/v1/latest?api_key={Environment.GetEnvironmentVariable("METALS_API_KEY")}&currency=USD&unit=toz");
+    var response = await client.GetAsync($"https://metals-api.com/api/latest?access_key={Environment.GetEnvironmentVariable("METALS_API_KEY")}&base=USD&symbols=XAU,XAG,XPT,EUR,GBP,CAD");
     var text = await response.Content.ReadAsStringAsync();
     var json = JsonDocument.Parse(text);
 
-    var goldUsd = json.RootElement.GetProperty("metals").GetProperty("gold").GetDecimal();
-    var silverUsd = json.RootElement.GetProperty("metals").GetProperty("silver").GetDecimal();
-    var platinumUsd = json.RootElement.GetProperty("metals").GetProperty("platinum").GetDecimal();
+    var goldUsd = json.RootElement.GetProperty("rates").GetProperty("USDXAU").GetDecimal();
+    var silverUsd = json.RootElement.GetProperty("rates").GetProperty("USDXAG").GetDecimal();
+    var platinumUsd = json.RootElement.GetProperty("rates").GetProperty("USDXPT").GetDecimal();
 
-    var cad = json.RootElement.GetProperty("currencies").GetProperty("CAD").GetDecimal();
-    var gbp = json.RootElement.GetProperty("currencies").GetProperty("GBP").GetDecimal();
-    var eur = json.RootElement.GetProperty("currencies").GetProperty("EUR").GetDecimal();
+    var cad = json.RootElement.GetProperty("rates").GetProperty("USDCAD").GetDecimal();
+    var gbp = json.RootElement.GetProperty("rates").GetProperty("USDGBP").GetDecimal();
+    var eur = json.RootElement.GetProperty("rates").GetProperty("USDEUR").GetDecimal();
 
     var goldCad = goldUsd / cad;
     var silverCad = silverUsd / cad;
