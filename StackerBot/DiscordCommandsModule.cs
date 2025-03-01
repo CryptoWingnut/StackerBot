@@ -6,6 +6,107 @@ using DSharpPlus.Entities;
 namespace StackerBot;
 
 public sealed class DiscordCommandsModule(IExternals externals, IRepository repository, ILogger<DiscordCommandsModule> logger) : BaseCommandModule {
+  [Command("join-stats")]
+  [RequireRoles(RoleCheckMode.Any, Parameters.REQUIRED_ROLE, Parameters.MODERATOR_ROLE)]
+  public async Task GenerateJoinStatistic(CommandContext context) {
+    try {
+      var statistics = new Dictionary<int, Dictionary<int, int>>();
+      var members = await context.Guild.GetAllMembersAsync();
+
+      foreach (var member in members) {
+        if (member.IsBot) {
+          continue;
+        }
+
+        var year = member.JoinedAt.Year;
+        var month = member.JoinedAt.Month;
+
+        if (!statistics.TryGetValue(year, out var yearValue)) {
+          yearValue = new Dictionary<int, int>();
+          statistics[year] = yearValue;
+        }
+
+        var yearStats = yearValue;
+
+        if (!yearValue.TryGetValue(month, out var monthValue)) {
+          monthValue = 0;
+          yearStats[month] = monthValue;
+        }
+
+        yearStats[month]++;
+      }
+
+      var output = new StringBuilder();
+
+      var yearsPresent = statistics.Keys.ToList();
+      yearsPresent.Sort();
+
+      foreach (var yearPresent in yearsPresent) {
+        var yearStats = statistics[yearPresent];
+
+        if (yearStats.TryGetValue(1, out var jan)) {
+          output.AppendLine($"01/{yearPresent},{jan}");
+        }
+
+        if (yearStats.TryGetValue(2, out var feb)) {
+          output.AppendLine($"02/{yearPresent},{feb}");
+        }
+
+        if (yearStats.TryGetValue(3, out var mar)) {
+          output.AppendLine($"03/{yearPresent},{mar}");
+        }
+
+        if (yearStats.TryGetValue(4, out var apr)) {
+          output.AppendLine($"04/{yearPresent},{apr}");
+        }
+
+        if (yearStats.TryGetValue(5, out var may)) {
+          output.AppendLine($"05/{yearPresent},{may}");
+        }
+
+        if (yearStats.TryGetValue(6, out var jun)) {
+          output.AppendLine($"06/{yearPresent},{jun}");
+        }
+
+        if (yearStats.TryGetValue(7, out var jul)) {
+          output.AppendLine($"07/{yearPresent},{jul}");
+        }
+
+        if (yearStats.TryGetValue(8, out var aug)) {
+          output.AppendLine($"08/{yearPresent},{aug}");
+        }
+
+        if (yearStats.TryGetValue(9, out var sep)) {
+          output.AppendLine($"09/{yearPresent},{sep}");
+        }
+
+        if (yearStats.TryGetValue(10, out var oct)) {
+          output.AppendLine($"10/{yearPresent},{oct}");
+        }
+
+        if (yearStats.TryGetValue(11, out var nov)) {
+          output.AppendLine($"11/{yearPresent},{nov}");
+        }
+
+        if (yearStats.TryGetValue(12, out var dec)) {
+          output.AppendLine($"12/{yearPresent},{dec}");
+        }
+      }
+
+      var bytes = Encoding.UTF8.GetBytes(output.ToString());
+      using var stream = new MemoryStream(bytes);
+
+      var builder = new DiscordMessageBuilder()
+        .WithContent("Here is the join statistics!")
+        .AddFile("join-stats.csv", stream);
+
+      await context.RespondAsync(builder);
+    } catch (Exception error) {
+      logger.LogError(error, "Exception occured while generating join statistics");
+      await context.RespondAsync("Error! Please notify Wingnut!");
+    }
+  }
+
   [Command("member-list")]
   [RequireRoles(RoleCheckMode.Any, Parameters.REQUIRED_ROLE)]
   public async Task GetMemberList(CommandContext context) {
